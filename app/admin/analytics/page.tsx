@@ -178,7 +178,7 @@ export default function AnalyticsDashboard() {
                 <Card className="bg-card rounded-[3rem] shadow-sereno-deep border-border overflow-hidden">
                   <CardHeader className="p-10 bg-secondary/20 border-b border-border">
                     <CardTitle className="text-xl font-black font-heading tracking-tight flex items-center gap-3">
-                       <TrendingUp className="w-5 h-5 text-indigo-600" /> Language Distribution
+                       <TrendingUp className="w-5 h-5 text-slate-950" /> Language Distribution
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="h-[400px] p-10 flex flex-col">
