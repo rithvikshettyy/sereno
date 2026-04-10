@@ -39,7 +39,7 @@ const MessageLogSchema = new Schema<IMessageLog>(
   {
     phone: { type: String, required: true, index: true },
     office_id: { type: String, default: null, index: true },
-    twilio_message_sid: { type: String, default: null, sparse: true },
+    twilio_message_sid: { type: String, default: null },
     raw_body: { type: String, default: "" },
     normalized_body: { type: String, default: "" },
     button_text: String,
