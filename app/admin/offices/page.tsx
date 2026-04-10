@@ -1,281 +1,194 @@
 "use client";
-
-import { useState, useEffect, useCallback } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { useState, useEffect } from "react";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Building2,
-  Plus,
-  Trash2,
-  MapPin,
-  QrCode,
-  TrendingUp,
-  LayoutDashboard,
-  ShieldCheck,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { 
+  Activity, 
+  Users, 
+  FileSearch, 
+  PlusCircle, 
+  MapPin, 
+  Hash, 
+  Building2,
+  QrCode,
+  Download
+} from "lucide-react";
 
-interface Office {
-  _id: string;
-  office_id: string;
-  name: string;
-  location: string;
-  created_at: string;
-}
+export default function Offices() {
+  const [offices, setOffices] = useState([]);
+  const [form, setForm] = useState({ office_id: "", name: "", location: "" });
 
-export default function OfficeManagement() {
-  const [offices, setOffices] = useState<Office[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [newOffice, setNewOffice] = useState({
-    office_id: "",
-    name: "",
-    location: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fetchOffices = () => fetch("/api/offices").then(r => r.json()).then(d => setOffices(d.data || []));
+  useEffect(() => { fetchOffices(); }, []);
 
-  const fetchOffices = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/offices");
-      const data = await res.json();
-      setOffices(data.data || []);
-    } catch (e) {
-      console.error("Failed to fetch offices", e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchOffices();
-  }, [fetchOffices]);
-
-  const handleAddOffice = async (e: React.FormEvent) => {
+  const addOffice = async (e: any) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const res = await fetch("/api/offices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newOffice),
-      });
-      if (!res.ok) throw new Error("Failed to add office");
-      setIsAddOpen(false);
-      setNewOffice({ office_id: "", name: "", location: "" });
-      fetchOffices();
-    } catch (e: any) {
-      alert(e.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (officeId: string) => {
-    if (!confirm("Are you sure? This will disable QR codes for this node.")) return;
-    try {
-      await fetch(`/api/offices/${officeId}`, { method: "DELETE" });
-      fetchOffices();
-    } catch (e) {
-      alert("Failed to delete office");
-    }
+    await fetch("/api/offices", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    setForm({ office_id: "", name: "", location: "" });
+    fetchOffices();
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex font-sans">
-      {/* Sidebar */}
-      <aside className="w-72 border-r border-border bg-card hidden lg:flex flex-col sticky top-0 h-screen z-40">
-        <div className="p-8 border-b border-border">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-black shadow-sereno transition-transform group-hover:scale-105">
-              S
-            </div>
-            <span className="font-heading text-2xl font-black tracking-tighter">Sereno Admin</span>
-          </Link>
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar - Reused for consistency */}
+      <aside className="w-80 border-r border-border/40 bg-white/50 backdrop-blur-md flex flex-col fixed inset-y-0">
+        <div className="p-10 border-b border-border/40">
+           <Link href="/" className="flex items-center gap-3 decoration-transparent">
+              <div className="w-10 h-10 rounded-2xl bg-black flex items-center justify-center text-white font-black shadow-lg">S</div>
+              <span className="font-heading text-2xl font-black text-black">Sereno</span>
+           </Link>
         </div>
         
         <nav className="flex-1 p-6 space-y-2">
-           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 mb-4">Operations</p>
-          <Link href="/admin" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-muted-foreground hover:bg-secondary hover:text-foreground hover:translate-x-1 transition-all">
-            <LayoutDashboard className="w-5 h-5" />
-            Live Feedback
-          </Link>
-          <Link href="/admin/offices" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-primary/5 text-primary font-bold shadow-sm transition-all">
-            <Building2 className="w-5 h-5" />
-            Office Master
-          </Link>
-          <Link href="/admin/analytics" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-muted-foreground hover:bg-secondary hover:text-foreground hover:translate-x-1 transition-all">
-            <TrendingUp className="w-5 h-5" />
-            Performance
-          </Link>
+            <Link href="/admin" className="flex items-center gap-3 px-6 py-4 text-muted-foreground hover:bg-slate-100/50 rounded-2xl text-sm font-bold transition-all">
+                <Activity className="w-5 h-5" /> Audit Console
+            </Link>
+            <Link href="/admin/offices" className="flex items-center gap-3 px-6 py-4 bg-black text-white rounded-2xl text-sm font-bold shadow-xl shadow-black/10 transition-all">
+                <Users className="w-5 h-5" /> Node Network
+            </Link>
+            <Link href="/admin/analytics" className="flex items-center gap-3 px-6 py-4 text-muted-foreground hover:bg-slate-100/50 rounded-2xl text-sm font-bold transition-all">
+                <FileSearch className="w-5 h-5" /> Analytics
+            </Link>
         </nav>
 
-        <div className="p-6 border-t border-border mt-auto">
-           {/* Space reserved for future admin settings or profile */}
+        <div className="p-8 border-t border-border/40">
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Network Health</p>
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-sm font-bold">{offices.length} Nodes Active</span>
+                </div>
+            </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 bg-background/50">
-        <header className="h-24 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-30 px-10 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-black font-heading tracking-tight text-foreground">Office Master</h2>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Node & Identity Management</p>
-          </div>
-          
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger asChild>
-              <Button className="h-12 px-8 rounded-2xl font-black shadow-sereno hover:shadow-sereno-deep transition-all">
-                <Plus className="w-5 h-5 mr-2" />
-                Register New Node
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md bg-card border-border rounded-[3rem] p-0 overflow-hidden shadow-sereno-deep shadow-2xl">
-              <DialogHeader className="p-10 bg-secondary/30 border-b border-border">
-                <DialogTitle className="text-3xl font-black font-heading tracking-tighter">New Registry Entry</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddOffice} className="p-10 space-y-8">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">System Identifier</p>
-                     <Input
-                      required
-                      placeholder="node-central-001"
-                      value={newOffice.office_id}
-                      onChange={(e) => setNewOffice({ ...newOffice, office_id: e.target.value })}
-                      className="bg-secondary/20 border-border rounded-xl font-mono text-sm h-12 px-4"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Official Office Name</p>
-                     <Input
-                      required
-                      placeholder="Pune Municipal Head Office"
-                      value={newOffice.name}
-                      onChange={(e) => setNewOffice({ ...newOffice, name: e.target.value })}
-                      className="bg-secondary/20 border-border rounded-xl font-bold h-12 px-4"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Geographic Location</p>
-                     <Input
-                      placeholder="Pune, Maharashtra"
-                      value={newOffice.location}
-                      onChange={(e) => setNewOffice({ ...newOffice, location: e.target.value })}
-                      className="bg-secondary/20 border-border rounded-xl font-medium h-12 px-4"
-                    />
-                  </div>
-                </div>
-                <DialogFooter className="pt-4 flex flex-col sm:flex-row gap-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setIsAddOpen(false)}
-                    className="rounded-xl flex-1 font-bold h-12"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="rounded-xl flex-1 font-black h-12 group"
-                  >
-                    {isSubmitting ? "Processing..." : "Authorize Node"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+      <main className="flex-1 pl-80">
+        <header className="h-24 border-b border-border/40 flex items-center justify-between px-12 bg-white/30 backdrop-blur-md sticky top-0 z-50">
+            <div>
+                <h2 className="text-xl font-black tracking-tight flex items-center gap-3">
+                   <Users className="w-5 h-5 text-muted-foreground" /> Node Network Management
+                </h2>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Configure Infrastructure Access Points</p>
+            </div>
         </header>
 
-        <div className="p-10 max-w-7xl mx-auto w-full">
-           <Card className="bg-card rounded-[2.5rem] shadow-sereno border border-border overflow-hidden">
-            <CardContent className="p-0">
+        <section className="p-12 space-y-12">
+            {/* Registration Console */}
+            <div className="glass-panel p-10 rounded-[2.5rem] bg-white/40 border border-border/40 shadow-sm">
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-white">
+                        <PlusCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-black">Register New Node</h3>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Connect a new office to the protocol</p>
+                    </div>
+                </div>
+
+                <form onSubmit={addOffice} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Protocol ID</label>
+                    <div className="relative">
+                        <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="e.g. MH-01" 
+                            value={form.office_id} 
+                            onChange={e => setForm({...form, office_id: e.target.value})} 
+                            className="pl-12 h-14 rounded-2xl border-slate-200 bg-white/50 focus:ring-black/5" 
+                        />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Node Name</label>
+                    <div className="relative">
+                        <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="e.g. Collector Office" 
+                            value={form.name} 
+                            onChange={e => setForm({...form, name: e.target.value})} 
+                            className="pl-12 h-14 rounded-2xl border-slate-200 bg-white/50 focus:ring-black/5" 
+                        />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Geographic Location</label>
+                    <div className="relative">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="e.g. Pune City" 
+                            value={form.location} 
+                            onChange={e => setForm({...form, location: e.target.value})} 
+                            className="pl-12 h-14 rounded-2xl border-slate-200 bg-white/50 focus:ring-black/5" 
+                        />
+                    </div>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="h-14 rounded-2xl bg-black text-white font-bold hover:bg-zinc-800 transition-all hover:scale-[1.02] shadow-xl shadow-black/5"
+                  >
+                    Authorize Node
+                  </Button>
+                </form>
+            </div>
+
+            {/* Nodes List */}
+            <div className="glass-panel rounded-[2.5rem] shadow-sereno border border-border/40 overflow-hidden bg-white/40">
               <Table>
-                <TableHeader>
-                  <TableRow className="bg-secondary/20 hover:bg-secondary/20 border-b border-border">
-                    <TableHead className="py-6 px-10 font-black text-[10px] uppercase tracking-widest text-foreground">Identifier</TableHead>
-                    <TableHead className="py-6 font-black text-[10px] uppercase tracking-widest text-foreground">Office Profile</TableHead>
-                    <TableHead className="py-6 font-black text-[10px] uppercase tracking-widest text-foreground">Location</TableHead>
-                    <TableHead className="py-6 px-10 font-black text-[10px] uppercase tracking-widest text-foreground text-right">Operations</TableHead>
-                  </TableRow>
+                <TableHeader className="bg-slate-50/50 border-b border-border/40">
+                    <TableRow>
+                        <TableHead className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</TableHead>
+                        <TableHead className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Origin ID</TableHead>
+                        <TableHead className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Node Designation</TableHead>
+                        <TableHead className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Provision QR</TableHead>
+                        <TableHead className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Location Node</TableHead>
+                    </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-24 text-muted-foreground animate-pulse font-bold tracking-widest">SYNCHRONIZING NETWORK...</TableCell>
-                    </TableRow>
-                  ) : offices.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-32">
-                         <Building2 className="w-16 h-16 text-muted-foreground/10 mx-auto mb-4" />
-                         <p className="text-muted-foreground font-black text-xl">No active nodes registered.</p>
+                  {offices.map((o: any) => (
+                    <TableRow key={o._id} className="hover:bg-slate-50/50 transition-colors border-b border-border/20 last:border-0">
+                      <TableCell className="px-8 py-8">
+                         <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm shadow-green-500/20" />
+                      </TableCell>
+                      <TableCell className="px-8 py-8 font-mono text-xs font-bold text-muted-foreground">{o.office_id}</TableCell>
+                      <TableCell className="px-8 py-8">
+                         <span className="font-heading text-lg font-black text-black">{o.name}</span>
+                      </TableCell>
+                      <TableCell className="px-8 py-8 text-center">
+                         <div className="flex items-center justify-center gap-3">
+                            <Button asChild variant="outline" size="sm" className="h-9 px-4 rounded-xl border-slate-200 hover:bg-slate-50 transition-all font-bold text-[10px] uppercase tracking-widest">
+                                <Link href={`/api/offices/${o.office_id}/qr?format=png`} target="_blank">PNG</Link>
+                            </Button>
+                            <Button asChild variant="outline" size="sm" className="h-9 px-4 rounded-xl border-slate-200 hover:bg-slate-50 transition-all font-bold text-[10px] uppercase tracking-widest">
+                                <Link href={`/api/offices/${o.office_id}/qr?format=svg`} target="_blank">SVG</Link>
+                            </Button>
+                         </div>
+                      </TableCell>
+                      <TableCell className="px-8 py-8 text-right">
+                         <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{o.location}</span>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    offices.map((office) => (
-                      <TableRow key={office._id} className="group hover:bg-secondary/10 transition-colors border-b border-border/50">
-                        <TableCell className="py-6 px-10">
-                           <Badge variant="outline" className="font-mono text-[10px] font-black border-primary/20 text-primary uppercase bg-primary/5 py-1 px-3 rounded-lg leading-none">{office.office_id}</Badge>
+                  ))}
+                  {offices.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={4} className="py-32 text-center text-muted-foreground font-bold uppercase tracking-widest text-xs">
+                           No nodes registered in the network
                         </TableCell>
-                        <TableCell className="py-6">
-                           <div className="font-black text-base text-foreground tracking-tight group-hover:text-primary transition-colors">{office.name}</div>
-                        </TableCell>
-                        <TableCell className="py-6">
-                           <div className="flex items-center gap-2 text-sm text-muted-foreground font-bold">
-                              <MapPin className="w-4 h-4 text-primary/40" />
-                              {office.location}
-                           </div>
-                        </TableCell>
-                        <TableCell className="py-6 px-10 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                             <Button
-                              variant="outline"
-                              size="sm"
-                              asChild
-                              className="rounded-xl border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all font-black h-10 px-5"
-                            >
-                              <a href={`/api/offices/${office.office_id}/qr?format=png`} target="_blank">
-                                <QrCode className="w-4 h-4 mr-2" />
-                                Entry QR
-                              </a>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(office.office_id)}
-                              className="w-10 h-10 p-0 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+        </section>
       </main>
     </div>
   );

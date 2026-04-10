@@ -8,8 +8,15 @@ export async function GET() {
     await connectDB();
 
     // Overall stats
-    const totalFeedback = await Feedback.countDocuments();
-    const totalOffices = await Office.countDocuments();
+    const total_feedback = await Feedback.countDocuments();
+    const total_offices = await Office.countDocuments();
+
+    // Average rating
+    const avgRatingAgg = await Feedback.aggregate([
+      { $match: { rating: { $exists: true, $ne: null } } },
+      { $group: { _id: null, avgRating: { $avg: "$rating" } } },
+    ]);
+    const average_rating = avgRatingAgg.length > 0 ? avgRatingAgg[0].avgRating : 0;
 
     // Rating distribution [1-5]: aggregate
     const ratingDist = await Feedback.aggregate([
@@ -57,8 +64,9 @@ export async function GET() {
 
     return NextResponse.json({
       data: {
-        totalFeedback,
-        totalOffices,
+        total_feedback,
+        total_offices,
+        average_rating,
         ratings,
         languages: langDist.map((l) => ({ name: l._id === "mr" ? "Marathi" : "English", value: l.count })),
         helpdesk: helpdeskStats.map((h) => ({ name: h._id ? "Available" : "Not Available", value: h.count })),

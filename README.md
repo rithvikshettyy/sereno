@@ -1,95 +1,89 @@
-# Sereno — Citizen Feedback Protocol
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Sereno is a bespoke GovTech platform designed to bridge the gap between citizens and government offices through a seamless, conversational WhatsApp AI. Built with a focus on high-fidelity design, trilingual support, and real-time governance metrics.
+## Getting Started
 
-## 🚀 Quick Start
+First, run the development server:
 
-### 1. Environment Configuration
-Create a `.env.local` file in the root directory and populate it with the following:
-
-```env
-MONGODB_URI=your_mongodb_connection_string
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886 (your twilio sandbox number)
-NEXT_PUBLIC_APP_URL=https://your-ngrok-url.ngrok-free.app
-```
-
-### 2. Installation
-```bash
-npm install
-```
-
-### 3. Development
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 4. Webhook Setup
-Point your Twilio WhatsApp Sandbox Sandbox URL to:
-`https://your-ngrok-url.ngrok-free.app/api/twilio/webhook`
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
----
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## 🛠 API Documentation (Log API)
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### Get All Feedback Logs
-Retrieve a unified stream of completed surveys and live interactions.
+## Learn More
 
-**Request:**
-```bash
-curl -X GET "http://localhost:3000/api/feedback?limit=10"
-```
+To learn more about Next.js, take a look at the following resources:
 
-### Get Raw Message Logs
-Retrieve raw inbound message history for audit purposes.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-**Request:**
-```bash
-curl -X GET "http://localhost:3000/api/logs"
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### Filter Logs by Phone
-**Request:**
-```bash
-curl -X GET "http://localhost:3000/api/logs?phone=91XXXXXXXXXX"
-```
+## Developer Runbook
 
----
+### 1. Prerequisites
+- **Node.js**: v18+ recommended.
+- **MongoDB**: A running instance (local or Atlas cluster).
+- **Twilio Account**: With WhatsApp Sandbox enabled.
+- **Ngrok**: For local webhook testing.
 
-## 🧪 Test Steps (Evidence Collection)
+### 2. Local Setup
+1. **Clone & Install**:
+   ```bash
+   npm install
+   ```
+2. **Environment**: Create a `.env.local` file with:
+   ```env
+   # MongoDB
+   MONGODB_URI=mongodb+srv://...
 
-### 1. QR Scan Experience
-1. Navigate to the Home Page or Admin Node Registry.
-2. Scan a generated QR code using your phone.
-3. WhatsApp will open with a pre-filled message: `I'm at the office. ID: node-central-001`.
-4. **Evidence:** Take a screenshot of the pre-filled message on your phone.
+   # Twilio
+   TWILIO_ACCOUNT_SID=AC...
+   TWILIO_AUTH_TOKEN=...
+   TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 
-### 2. Conversational Flow (Trilingual)
-1. Send the pre-filled message to the Sereno WhatsApp number.
-2. Select language (1 for Marathi, 2 for English, 3 for Hindi).
-3. Complete the 6-question survey.
-4. **Evidence:** Take a screenshot of the full WhatsApp chat history.
+   # App
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+3. **Run**:
+   ```bash
+   npm run dev
+   ```
 
-### 3. Admin Dashboard
-1. Open `/admin`.
-2. Verify that your chat interaction appears in the "Feedback Stream" in real-time.
-3. **Evidence:** Take a screenshot of the Admin Dashboard showing your entry.
+### 3. Public Webhook (Ngrok)
+To receive WhatsApp messages locally:
+1. Start Ngrok: `ngrok http 3000`
+2. Copy the `https` forwarding URL (e.g., `https://xyz.ngrok.io`).
+3. In Twilio Sandbox Settings, set the **"A MESSAGE COMES IN"** webhook to:
+   `https://xyz.ngrok.io/api/twilio/webhook`
 
-### 4. Database Verification
-1. Access your MongoDB (Atlas or Compass).
-2. Check the `messagelogs` and `feedbacks` collections.
-3. **Evidence:** Take a screenshot of the JSON document for your recent interaction.
+### 4. End-to-End Test Plan
+1. **Register Office**: Go to `/admin/offices` and add an office (e.g., ID: `test-01`).
+2. **Scan QR**: Open the Home page (`/`), find your office, and click the "PNG" button or scan the QR.
+3. **WhatsApp Handshake**: It should open WhatsApp with a prefilled greeting like "Hi! I'm at ... ID: test-01".
+4. **Complete Flow**: Answer the bot questions:
+   - "1" for Marathi or "2" for English.
+   - "1" (Yes) for visit.
+   - "5" (Rating).
+   - "1" (Yes) for helpdesk.
+   - "Friendly staff" (Behavior).
+   - "More chairs needed" (Suggestion).
+5. **Verify Logs**: Go to `/admin` to see all raw inbound messages captured.
+6. **Verify Analytics**: Go to `/admin/analytics` to see the rating distribution and stats update.
+7. **Verify Database**: Check the `messagelogs` and `feedbacks` collections in MongoDB.
 
----
-
-## 🏗 Technology Stack
-- **Framework:** Next.js 14 (App Router)
-- **Database:** MongoDB with Mongoose
-- **Messaging:** Twilio WhatsApp API
-- **Styling:** Bespoke CSS with Nordic Slate Palette
-- **Icons:** Lucide React
-- **Charts:** Recharts
-
----
-Created with purpose for modern governance.
+### 5. API Reference
+- **GET `/api/logs`**: Lists recent messages. (Params: `phone`, `office_id`, `limit`)
+- **GET `/api/offices`**: Lists registered offices.
+- **GET `/api/analytics`**: Aggregated performance data.
+- **GET `/api/offices/[id]/qr`**: Generates QR code asset.
