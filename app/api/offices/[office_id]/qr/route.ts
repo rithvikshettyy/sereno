@@ -62,7 +62,7 @@ export async function GET(
       width: 400,
     });
 
-    return new NextResponse(buffer, {
+    return new Response(buffer as any, {
       headers: {
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=86400",

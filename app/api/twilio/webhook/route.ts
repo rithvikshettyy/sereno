@@ -184,13 +184,13 @@ export async function POST(req: NextRequest) {
         const { Feedback } = await import("@/models/Feedback");
         await Feedback.create({
           phone,
-          office_id: resolvedOfficeId,
+          office_id: resolvedOfficeId as string,
           language: currentLang,
-          visit_confirmed: updatedData.visit_confirmed,
-          rating: updatedData.rating,
-          helpdesk_available: updatedData.helpdesk_available,
-          staff_feedback: updatedData.staff_behavior,
-          suggestion: updatedData.suggestion,
+          visit_confirmed: updatedData.visit_confirmed as boolean,
+          rating: updatedData.rating as number,
+          helpdesk_available: updatedData.helpdesk_available as boolean,
+          staff_feedback: updatedData.staff_behavior as string,
+          suggestion: updatedData.suggestion as string,
         });
         console.log(`[Webhook] Recorded feedback for ${phone} | Office: ${resolvedOfficeId}`);
       } catch (fErr) {
