@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const dynamic = "force-dynamic";
 import { connectDB } from "@/lib/db";
 import { Office } from "@/models/Office";
 import { Button } from "@/components/ui/button";
